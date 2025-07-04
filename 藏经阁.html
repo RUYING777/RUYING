@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>藏经阁小说软件</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #8B4513;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0;
+        }
+        .action-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        button {
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #A0522D;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 5px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], 
+        textarea, 
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .books-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .book-card {
+            background-color: white;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+        .book-cover {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        .book-info {
+            padding: 15px;
+        }
+        .book-title {
+            font-size: 18px;
+            margin: 0 0 10px 0;
+            color: #8B4513;
+        }
+        .book-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .book-meta {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .book-category {
+            display: inline-block;
+            background-color: #e6e6e6;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .book-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .book-actions button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .book-actions .read-btn {
+            background-color: #4CAF50;
+        }
+        .book-actions .delete-btn {
+            background-color: #f44336;
+        }
+        .reader-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            overflow: auto;
+        }
+        .reader-content {
+            background-color: #f8f5e6;
+            margin: 20px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 5px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .reader-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .reader-title {
+            font-size: 24px;
+            color: #8B4513;
+            margin: 0;
+        }
+        .reader-text {
+            white-space: pre-line;
+        }
+        .reader-tools {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .search-container input {
+            flex-grow: 1;
+        }
+        .category-filter {
+            margin-bottom: 20px;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #8B4513;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom: 3px solid #8B4513;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .bookmark-item, .note-item {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .bookmark-title, .note-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .bookmark-content, .note-content {
+            font-size: 14px;
+            color: #666;
+        }
+        .bookmark-meta, .note-meta {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .bookmark-actions, .note-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .bookmark-actions button, .note-actions button {
+            padding: 3px 8px;
+            font-size: 12px;
+        }
+        .add-note-form {
+            margin-top: 20px;
+        }
+        .history-item {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-info {
+            flex-grow: 1;
+        }
+        .history-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .history-date {
+            font-size: 12px;
+            color: #888;
+        }
+        .history-actions button {
+            padding: 3px 8px;
+            font-size: 12px;
+        }
+        .author-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(139, 69, 19, 0.8);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .book-actions .download-btn {
+            background-color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="C:\Users\Administrator\Desktop\藏经阁\cjg.png">
+            <h1>藏经阁</h1>
+        </header>
+
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="library">书库</button>
+                <button class="tab-button" data-tab="bookmarks">书签</button>
+                <button class="tab-button" data-tab="notes">笔记</button>
+                <button class="tab-button" data-tab="history">阅读历史</button>
+            </div>
+        </div>
+
+        <div class="tab-content active" id="library-tab">
+            <div class="action-buttons">
+                <div>
+                    <button id="addBookBtn">添加新书</button>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="搜索书名或作者">
+                    <button id="searchBtn">搜索</button>
+                </div>
+            </div>
+
+            <div class="category-filter">
+                <select id="categoryFilter">
+                    <option value="">所有分类</option>
+                    <option value="武侠">武侠</option>
+                    <option value="玄幻">玄幻</option>
+                    <option value="科幻">科幻</option>
+                    <option value="言情">言情</option>
+                    <option value="悬疑">悬疑</option>
+                    <option value="历史">历史</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+
+            <div class="books-container" id="booksContainer">
+                <!-- 书籍卡片将在这里动态生成 -->
+            </div>
+        </div>
+
+        <div class="tab-content" id="bookmarks-tab">
+            <h2>我的书签</h2>
+            <div id="bookmarksList">
+                <!-- 书签列表将在这里动态生成 -->
+            </div>
+        </div>
+
+        <div class="tab-content" id="notes-tab">
+            <h2>我的笔记</h2>
+            <div id="notesList">
+                <!-- 笔记列表将在这里动态生成 -->
+            </div>
+            <div class="add-note-form">
+                <h3>添加新笔记</h3>
+                <div class="form-group">
+                    <label for="noteTitle">标题</label>
+                    <input type="text" id="noteTitle" placeholder="笔记标题">
+                </div>
+                <div class="form-group">
+                    <label for="noteContent">内容</label>
+                    <textarea id="noteContent" placeholder="笔记内容"></textarea>
+                </div>
+                <button id="addNoteBtn">添加笔记</button>
+            </div>
+        </div>
+
+        <div class="tab-content" id="history-tab">
+            <h2>阅读历史</h2>
+            <div id="historyList">
+                <!-- 阅读历史将在这里动态生成 -->
+            </div>
+        </div>
+
+        <!-- 添加书籍的模态框 -->
+        <div id="addBookModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>添加新书</h2>
+                <form id="addBookForm">
+                    <div class="form-group">
+                        <label for="bookTitle">书名</label>
+                        <input type="text" id="bookTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookAuthor">作者</label>
+                        <input type="text" id="bookAuthor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookCategory">分类</label>
+                        <select id="bookCategory" required>
+                            <option value="武侠">武侠</option>
+                            <option value="玄幻">玄幻</option>
+                            <option value="科幻">科幻</option>
+                            <option value="言情">言情</option>
+                            <option value="悬疑">悬疑</option>
+                            <option value="历史">历史</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookCover">封面图片</label>
+                        <input type="file" id="bookCover" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookDesc">简介</label>
+                        <textarea id="bookDesc" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookContent">内容</label>
+                        <textarea id="bookContent" required></textarea>
+                    </div>
+                    <button type="submit">保存</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 阅读器的模态框 -->
+        <div id="readerModal" class="reader-modal">
+            <div class="reader-content">
+                <div class="reader-header">
+                    <h2 class="reader-title" id="readerTitle"></h2>
+                    <span class="close" id="closeReader">&times;</span>
+                </div>
+                <div class="reader-text" id="readerText"></div>
+                <div class="reader-tools">
+                    <button id="addBookmarkBtn">添加书签</button>
+                    <div>
+                        <button id="prevBookmarkBtn">上一个书签</button>
+                        <button id="nextBookmarkBtn">下一个书签</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加书签的模态框 -->
+        <div id="addBookmarkModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>添加书签</h2>
+                <div class="form-group">
+                    <label for="bookmarkTitle">书签名称</label>
+                    <input type="text" id="bookmarkTitle" placeholder="书签名称">
+                </div>
+                <div class="form-group">
+                    <label for="bookmarkNote">备注</label>
+                    <textarea id="bookmarkNote" placeholder="可选备注"></textarea>
+                </div>
+                <button id="saveBookmarkBtn">保存书签</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据库变量
+        let db;
+        const DB_NAME = "LibraryDB";
+        const DB_VERSION = 2;
+        const STORE_NAMES = {
+            BOOKS: "books",
+            BOOKMARKS: "bookmarks",
+            NOTES: "notes",
+            HISTORY: "history"
+        };
+
+        // 当前阅读的书籍ID
+        let currentBookId = null;
+        // 当前作者名称
+        let currentAuthor = "匿名作者";
+
+        // 初始化数据库
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = function(event) {
+                    console.error("数据库打开失败:", event.target.error);
+                    reject("数据库打开失败");
+                };
+                
+                request.onsuccess = function(event) {
+                    db = event.target.result;
+                    console.log("数据库打开成功");
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = function(event) {
+                    const db = event.target.result;
+                    
+                    // 创建书籍存储
+                    if (!db.objectStoreNames.contains(STORE_NAMES.BOOKS)) {
+                        const store = db.createObjectStore(STORE_NAMES.BOOKS, { keyPath: "id", autoIncrement: true });
+                        store.createIndex("title", "title", { unique: false });
+                        store.createIndex("author", "author", { unique: false });
+                        store.createIndex("category", "category", { unique: false });
+                        console.log("书籍存储创建成功");
+                    }
+                    
+                    // 创建书签存储
+                    if (!db.objectStoreNames.contains(STORE_NAMES.BOOKMARKS)) {
+                        const store = db.createObjectStore(STORE_NAMES.BOOKMARKS, { keyPath: "id", autoIncrement: true });
+                        store.createIndex("bookId", "bookId", { unique: false });
+                        store.createIndex("createdAt", "createdAt", { unique: false });
+                        console.log("书签存储创建成功");
+                    }
+                    
+                    // 创建笔记存储
+                    if (!db.objectStoreNames.contains(STORE_NAMES.NOTES)) {
+                        const store = db.createObjectStore(STORE_NAMES.NOTES, { keyPath: "id", autoIncrement: true });
+                        store.createIndex("createdAt", "createdAt", { unique: false });
+                        console.log("笔记存储创建成功");
+                    }
+                    
+                    // 创建阅读历史存储
+                    if (!db.objectStoreNames.contains(STORE_NAMES.HISTORY)) {
+                        const store = db.createObjectStore(STORE_NAMES.HISTORY, { keyPath: "id", autoIncrement: true });
+                        store.createIndex("bookId", "bookId", { unique: false });
+                        store.createIndex("readAt", "readAt", { unique: false });
+                        console.log("阅读历史存储创建成功");
+                    }
+                };
+            });
+        }
+
+        // 添加书籍到数据库
+        function addBook(book) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKS], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.BOOKS);
+                
+                const request = store.add(book);
+                
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+                
+                request.onerror = function(event) {
+                    reject("书籍添加失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 获取所有书籍
+        function getAllBooks() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKS], "readonly");
+                const store = transaction.objectStore(STORE_NAMES.BOOKS);
+                const request = store.getAll();
+                
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+                
+                request.onerror = function(event) {
+                    reject("获取书籍失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 根据ID获取书籍
+        function getBookById(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKS], "readonly");
+                const store = transaction.objectStore(STORE_NAMES.BOOKS);
+                const request = store.get(id);
+                
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+                
+                request.onerror = function(event) {
+                    reject("获取书籍失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 删除书籍
+        function deleteBook(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKS], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.BOOKS);
+                const request = store.delete(id);
+                
+                request.onsuccess = function() {
+                    deleteBookmarksByBookId(id);
+                    deleteHistoryByBookId(id);
+                    resolve("书籍删除成功");
+                };
+                
+                request.onerror = function(event) {
+                    reject("书籍删除失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 添加书签
+        function addBookmark(bookmark) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKMARKS], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.BOOKMARKS);
+                
+                const request = store.add(bookmark);
+                
+                request.onsuccess = function() {
+                    resolve("书签添加成功");
+                };
+                
+                request.onerror = function(event) {
+                    reject("书签添加失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 获取书籍的所有书签
+        function getBookmarksByBookId(bookId) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKMARKS], "readonly");
+                const store = transaction.objectStore(STORE_NAMES.BOOKMARKS);
+                const index = store.index("bookId");
+                const request = index.getAll(bookId);
+                
+                request.onsuccess = function() {
+                    resolve(request.result);
+                };
+                
+                request.onerror = function(event) {
+                    reject("获取书签失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 获取所有书签（按时间倒序）
+        function getAllBookmarks() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKMARKS], "readonly");
+                const store = transaction.objectStore(STORE_NAMES.BOOKMARKS);
+                const request = store.getAll();
+                
+                request.onsuccess = async function() {
+                    const bookmarks = request.result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    
+                    const bookmarksWithBookInfo = await Promise.all(
+                        bookmarks.map(async bookmark => {
+                            const book = await getBookById(bookmark.bookId);
+                            return {
+                                ...bookmark,
+                                bookTitle: book ? book.title : "未知书籍",
+                                bookAuthor: book ? book.author : "未知作者"
+                            };
+                        })
+                    );
+                    
+                    resolve(bookmarksWithBookInfo);
+                };
+                
+                request.onerror = function(event) {
+                    reject("获取书签失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 删除书签
+        function deleteBookmark(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKMARKS], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.BOOKMARKS);
+                const request = store.delete(id);
+                
+                request.onsuccess = function() {
+                    resolve("书签删除成功");
+                };
+                
+                request.onerror = function(event) {
+                    reject("书签删除失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 删除书籍的所有书签
+        function deleteBookmarksByBookId(bookId) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.BOOKMARKS], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.BOOKMARKS);
+                const index = store.index("bookId");
+                const request = index.openCursor(bookId);
+                
+                request.onsuccess = function(event) {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        cursor.delete();
+                        cursor.continue();
+                    } else {
+                        resolve("书签删除成功");
+                    }
+                };
+                
+                request.onerror = function(event) {
+                    reject("书签删除失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 添加笔记
+        function addNote(note) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.NOTES], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.NOTES);
+                
+                const request = store.add(note);
+                
+                request.onsuccess = function() {
+                    resolve("笔记添加成功");
+                };
+                
+                request.onerror = function(event) {
+                    reject("笔记添加失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 获取所有笔记（按时间倒序）
+        function getAllNotes() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.NOTES], "readonly");
+                const store = transaction.objectStore(STORE_NAMES.NOTES);
+                const request = store.getAll();
+                
+                request.onsuccess = function() {
+                    const notes = request.result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    resolve(notes);
+                };
+                
+                request.onerror = function(event) {
+                    reject("获取笔记失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 删除笔记
+        function deleteNote(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.NOTES], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.NOTES);
+                const request = store.delete(id);
+                
+                request.onsuccess = function() {
+                    resolve("笔记删除成功");
+                };
+                
+                request.onerror = function(event) {
+                    reject("笔记删除失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 添加阅读历史
+        function addHistory(history) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.HISTORY], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.HISTORY);
+                
+                const request = store.add(history);
+                
+                request.onsuccess = function() {
+                    resolve("阅读历史添加成功");
+                };
+                
+                request.onerror = function(event) {
+                    reject("阅读历史添加失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 获取所有阅读历史（按时间倒序）
+        function getAllHistory() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.HISTORY], "readonly");
+                const store = transaction.objectStore(STORE_NAMES.HISTORY);
+                const request = store.getAll();
+                
+                request.onsuccess = async function() {
+                    const history = request.result.sort((a, b) => new Date(b.readAt) - new Date(a.readAt));
+                    
+                    const historyWithBookInfo = await Promise.all(
+                        history.map(async item => {
+                            const book = await getBookById(item.bookId);
+                            return {
+                                ...item,
+                                bookTitle: book ? book.title : "未知书籍",
+                                bookAuthor: book ? book.author : "未知作者",
+                                bookCover: book ? book.cover : ""
+                            };
+                        })
+                    );
+                    
+                    resolve(historyWithBookInfo);
+                };
+                
+                request.onerror = function(event) {
+                    reject("获取阅读历史失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 删除阅读历史
+        function deleteHistory(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.HISTORY], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.HISTORY);
+                const request = store.delete(id);
+                
+                request.onsuccess = function() {
+                    resolve("阅读历史删除成功");
+                };
+                
+                request.onerror = function(event) {
+                    reject("阅读历史删除失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 删除书籍的所有阅读历史
+        function deleteHistoryByBookId(bookId) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAMES.HISTORY], "readwrite");
+                const store = transaction.objectStore(STORE_NAMES.HISTORY);
+                const index = store.index("bookId");
+                const request = index.openCursor(bookId);
+                
+                request.onsuccess = function(event) {
+                    const cursor = event.target.result;
+                    if (cursor) {
+                        cursor.delete();
+                        cursor.continue();
+                    } else {
+                        resolve("阅读历史删除成功");
+                    }
+                };
+                
+                request.onerror = function(event) {
+                    reject("阅读历史删除失败: " + event.target.error);
+                };
+            });
+        }
+
+        // 打开阅读器
+        async function openReader(bookId) {
+            try {
+                console.log("尝试打开书籍ID:", bookId);
+                
+                const book = await getBookById(bookId);
+                console.log("获取到的书籍数据:", book);
+                
+                if (!book) {
+                    throw new Error("未找到该书籍");
+                }
+                
+                currentBookId = bookId;
+                
+                try {
+                    await addHistory({
+                        bookId: book.id,
+                        readAt: new Date().toISOString()
+                    });
+                    console.log("阅读历史记录成功");
+                } catch (historyError) {
+                    console.error("记录阅读历史失败:", historyError);
+                }
+                
+                document.getElementById("readerTitle").textContent = `${book.title} - ${book.author}`;
+                document.getElementById("readerText").textContent = book.content;
+                document.getElementById("readerModal").style.display = "block";
+                
+                console.log("阅读器已显示");
+                
+            } catch (error) {
+                console.error("打开阅读器失败 - 详细信息:", {
+                    error: error,
+                    stack: error.stack,
+                    bookId: bookId,
+                    currentBookId: currentBookId
+                });
+                alert(`打开阅读器失败: ${error.message}`);
+            }
+        }
+
+        // 绑定阅读按钮事件
+        function bindReadButtons() {
+            document.querySelectorAll(".read-btn").forEach(btn => {
+                btn.addEventListener("click", async function() {
+                    const bookId = parseInt(this.getAttribute("data-id"));
+                    console.log("阅读按钮点击，书籍ID:", bookId);
+                    await openReader(bookId);
+                });
+            });
+        }
+
+        // 显示所有书籍
+        async function displayBooks(filter = {}) {
+            try {
+                let books = await getAllBooks();
+                console.log("从数据库获取的书籍:", books);
+                
+                if (filter.search) {
+                    const searchTerm = filter.search.toLowerCase();
+                    books = books.filter(book => 
+                        book.title.toLowerCase().includes(searchTerm) || 
+                        book.author.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                if (filter.category) {
+                    books = books.filter(book => book.category === filter.category);
+                }
+                
+                const container = document.getElementById("booksContainer");
+                container.innerHTML = "";
+                
+                if (books.length === 0) {
+                    container.innerHTML = "<p>暂无书籍，请添加新书</p>";
+                    return;
+                }
+                
+                books.forEach(book => {
+                    const bookCard = document.createElement("div");
+                    bookCard.className = "book-card";
+                    bookCard.innerHTML = `
+                        <img src="${book.cover}" alt="${book.title}" class="book-cover">
+                        <div class="book-info">
+                            <h3 class="book-title">${book.title}</h3>
+                            <p class="book-meta">作者: ${book.author}</p>
+                            <p class="book-meta">分类: <span class="book-category">${book.category}</span></p>
+                            <p class="book-desc">${book.description}</p>
+                            <div class="book-actions">
+                                <button class="read-btn" data-id="${book.id}">阅读</button>
+                                <button class="download-btn" data-id="${book.id}">下载</button>
+                                <button class="delete-btn" data-id="${book.id}">删除</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(bookCard);
+                });
+
+                // 添加下载按钮事件绑定
+                function bindDownloadButtons() {
+                    document.querySelectorAll(".download-btn").forEach(btn => {
+                        btn.addEventListener("click", async function() {
+                            const bookId = parseInt(this.getAttribute("data-id"));
+                            await downloadBook(bookId);
+                        });
+                    });
+                }
+                
+                bindReadButtons();
+                
+                document.querySelectorAll(".delete-btn").forEach(btn => {
+                    btn.addEventListener("click", async function() {
+                        const bookId = parseInt(this.getAttribute("data-id"));
+                        if (confirm("确定要删除这本书吗？此操作不可撤销！")) {
+                            try {
+                                await deleteBook(bookId);
+                                await displayBooks(filter);
+                                alert("书籍删除成功！");
+                            } catch (error) {
+                                console.error("删除书籍失败:", error);
+                                alert("删除书籍失败: " + error);
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                console.error("显示书籍失败:", error);
+                alert("显示书籍失败: " + error);
+            }
+            bindDownloadButtons();
+        }
+
+        // 新增下载书籍函数
+        async function downloadBook(bookId) {
+            try {
+                const book = await getBookById(bookId);
+                
+                if (!book) {
+                    throw new Error("未找到该书籍");
+                }
+                
+                // 创建下载内容
+                const content = `
+                    书名: ${book.title}
+                    作者: ${book.author}
+                    分类: ${book.category}
+                    简介: ${book.description}
+
+                    ${book.content}
+                `;
+                
+                // 创建Blob对象
+                const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                
+                // 创建下载链接
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${book.title}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 0);
+                
+                alert(`"${book.title}" 下载成功！`);
+                
+            } catch (error) {
+                console.error("下载书籍失败:", error);
+                alert("下载书籍失败: " + error.message);
+            }
+        }
+
+        // 显示所有书签
+        async function displayBookmarks() {
+            try {
+                const bookmarks = await getAllBookmarks();
+                const container = document.getElementById("bookmarksList");
+                container.innerHTML = "";
+                
+                if (bookmarks.length === 0) {
+                    container.innerHTML = "<p>暂无书签</p>";
+                    return;
+                }
+                
+                bookmarks.forEach(bookmark => {
+                    const bookmarkItem = document.createElement("div");
+                    bookmarkItem.className = "bookmark-item";
+                    bookmarkItem.innerHTML = `
+                        <div class="bookmark-title">${bookmark.title || "未命名书签"}</div>
+                        <div class="bookmark-content">${bookmark.note || "无备注"}</div>
+                        <div class="bookmark-meta">
+                            书籍: ${bookmark.bookTitle} (${bookmark.bookAuthor}) | 
+                            创建于: ${new Date(bookmark.createdAt).toLocaleString()}
+                        </div>
+                        <div class="bookmark-actions">
+                            <button class="goto-bookmark-btn" data-book-id="${bookmark.bookId}">前往</button>
+                            <button class="delete-bookmark-btn" data-id="${bookmark.id}">删除</button>
+                        </div>
+                    `;
+                    container.appendChild(bookmarkItem);
+                });
+                
+                document.querySelectorAll(".goto-bookmark-btn").forEach(btn => {
+                    btn.addEventListener("click", async function() {
+                        const bookId = parseInt(this.getAttribute("data-book-id"));
+                        await openReader(bookId);
+                        switchTab('library');
+                    });
+                });
+                
+                document.querySelectorAll(".delete-bookmark-btn").forEach(btn => {
+                    btn.addEventListener("click", async function() {
+                        const bookmarkId = parseInt(this.getAttribute("data-id"));
+                        if (confirm("确定要删除这个书签吗？")) {
+                            try {
+                                await deleteBookmark(bookmarkId);
+                                await displayBookmarks();
+                                alert("书签删除成功！");
+                            } catch (error) {
+                                console.error("删除书签失败:", error);
+                                alert("删除书签失败: " + error);
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                console.error("显示书签失败:", error);
+                alert("显示书签失败: " + error);
+            }
+        }
+
+        // 显示所有笔记
+        async function displayNotes() {
+            try {
+                const notes = await getAllNotes();
+                const container = document.getElementById("notesList");
+                container.innerHTML = "";
+                
+                if (notes.length === 0) {
+                    container.innerHTML = "<p>暂无笔记</p>";
+                    return;
+                }
+                
+                notes.forEach(note => {
+                    const noteItem = document.createElement("div");
+                    noteItem.className = "note-item";
+                    noteItem.innerHTML = `
+                        <div class="note-title">${note.title}</div>
+                        <div class="note-content">${note.content}</div>
+                        <div class="note-meta">
+                            创建于: ${new Date(note.createdAt).toLocaleString()}
+                        </div>
+                        <div class="note-actions">
+                            <button class="delete-note-btn" data-id="${note.id}">删除</button>
+                        </div>
+                    `;
+                    container.appendChild(noteItem);
+                });
+                
+                document.querySelectorAll(".delete-note-btn").forEach(btn => {
+                    btn.addEventListener("click", async function() {
+                        const noteId = parseInt(this.getAttribute("data-id"));
+                        if (confirm("确定要删除这个笔记吗？")) {
+                            try {
+                                await deleteNote(noteId);
+                                await displayNotes();
+                                alert("笔记删除成功！");
+                            } catch (error) {
+                                console.error("删除笔记失败:", error);
+                                alert("删除笔记失败: " + error);
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                console.error("显示笔记失败:", error);
+                alert("显示笔记失败: " + error);
+            }
+        }
+
+        // 显示阅读历史
+        async function displayHistory() {
+            try {
+                const history = await getAllHistory();
+                const container = document.getElementById("historyList");
+                container.innerHTML = "";
+                
+                if (history.length === 0) {
+                    container.innerHTML = "<p>暂无阅读历史</p>";
+                    return;
+                }
+                
+                history.forEach(item => {
+                    const historyItem = document.createElement("div");
+                    historyItem.className = "history-item";
+                    historyItem.innerHTML = `
+                        <div class="history-info">
+                            <div class="history-title">${item.bookTitle} (${item.bookAuthor})</div>
+                            <div class="history-date">阅读于: ${new Date(item.readAt).toLocaleString()}</div>
+                        </div>
+                        <div class="history-actions">
+                            <button class="read-history-btn" data-book-id="${item.bookId}">阅读</button>
+                            <button class="delete-history-btn" data-id="${item.id}">删除</button>
+                        </div>
+                    `;
+                    container.appendChild(historyItem);
+                });
+                
+                document.querySelectorAll(".read-history-btn").forEach(btn => {
+                    btn.addEventListener("click", async function() {
+                        const bookId = parseInt(this.getAttribute("data-book-id"));
+                        await openReader(bookId);
+                        switchTab('library');
+                    });
+                });
+                
+                document.querySelectorAll(".delete-history-btn").forEach(btn => {
+                    btn.addEventListener("click", async function() {
+                        const historyId = parseInt(this.getAttribute("data-id"));
+                        if (confirm("确定要删除这条阅读历史吗？")) {
+                            try {
+                                await deleteHistory(historyId);
+                                await displayHistory();
+                                alert("阅读历史删除成功！");
+                            } catch (error) {
+                                console.error("删除阅读历史失败:", error);
+                                alert("删除阅读历史失败: " + error);
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                console.error("显示阅读历史失败:", error);
+                alert("显示阅读历史失败: " + error);
+            }
+        }
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll(".tab-content").forEach(tab => {
+                tab.classList.remove("active");
+            });
+            
+            document.querySelectorAll(".tab-button").forEach(btn => {
+                btn.classList.remove("active");
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.add("active");
+            document.querySelector(`.tab-button[data-tab="${tabName}"]`).classList.add("active");
+            
+            if (tabName === 'bookmarks') {
+                displayBookmarks();
+            } else if (tabName === 'notes') {
+                displayNotes();
+            } else if (tabName === 'history') {
+                displayHistory();
+            } else if (tabName === 'library') {
+                displayBooks();
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener("DOMContentLoaded", async function() {
+            try {
+                console.log("开始初始化数据库...");
+                await initDB();
+                console.log("数据库初始化完成");
+                
+                await displayBooks();
+                
+                document.getElementById("addBookBtn").addEventListener("click", function() {
+                    document.getElementById("addBookModal").style.display = "block";
+                });
+                
+                document.getElementById("searchBtn").addEventListener("click", async function() {
+                    const searchTerm = document.getElementById("searchInput").value.trim();
+                    await displayBooks({ search: searchTerm });
+                });
+                
+                document.getElementById("categoryFilter").addEventListener("change", async function() {
+                    const category = this.value;
+                    await displayBooks({ category: category || undefined });
+                });
+                
+                document.querySelector(".close").addEventListener("click", function() {
+                    document.getElementById("addBookModal").style.display = "none";
+                });
+                
+                document.getElementById("closeReader").addEventListener("click", function() {
+                    document.getElementById("readerModal").style.display = "none";
+                });
+                
+                window.addEventListener("click", function(event) {
+                    if (event.target === document.getElementById("addBookModal")) {
+                        document.getElementById("addBookModal").style.display = "none";
+                    }
+                    if (event.target === document.getElementById("readerModal")) {
+                        document.getElementById("readerModal").style.display = "none";
+                    }
+                    if (event.target === document.getElementById("addBookmarkModal")) {
+                        document.getElementById("addBookmarkModal").style.display = "none";
+                    }
+                });
+                
+                document.getElementById("addBookForm").addEventListener("submit", async function(e) {
+                    e.preventDefault();
+                    
+                    const title = document.getElementById("bookTitle").value;
+                    const author = document.getElementById("bookAuthor").value;
+                    const category = document.getElementById("bookCategory").value;
+                    const description = document.getElementById("bookDesc").value;
+                    const content = document.getElementById("bookContent").value;
+                    const coverFile = document.getElementById("bookCover").files[0];
+                    
+                    if (!coverFile) {
+                        alert("请上传封面图片");
+                        return;
+                    }
+                    
+                    try {
+                        const cover = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                resolve(e.target.result);
+                            };
+                            reader.onerror = function(error) {
+                                reject(error);
+                            };
+                            reader.readAsDataURL(coverFile);
+                        });
+                        
+                        const book = {
+                            title,
+                            author,
+                            category,
+                            description,
+                            content,
+                            cover,
+                            createdAt: new Date().toISOString()
+                        };
+                        
+                        await addBook(book);
+                        
+                        this.reset();
+                        document.getElementById("addBookModal").style.display = "none";
+                        await displayBooks();
+                        alert("书籍添加成功！");
+                        
+                    } catch (error) {
+                        console.error("添加书籍失败:", error);
+                        alert("添加书籍失败: " + error);
+                    }
+                });
+                
+                document.getElementById("addBookmarkBtn").addEventListener("click", function() {
+                    document.getElementById("addBookmarkModal").style.display = "block";
+                });
+                
+                document.getElementById("saveBookmarkBtn").addEventListener("click", async function() {
+                    const title = document.getElementById("bookmarkTitle").value.trim() || "未命名书签";
+                    const note = document.getElementById("bookmarkNote").value.trim();
+                    
+                    try {
+                        await addBookmark({
+                            bookId: currentBookId,
+                            title,
+                            note,
+                            createdAt: new Date().toISOString()
+                        });
+                        
+                        document.getElementById("bookmarkTitle").value = "";
+                        document.getElementById("bookmarkNote").value = "";
+                        document.getElementById("addBookmarkModal").style.display = "none";
+                        alert("书签添加成功！");
+                        await displayBookmarks();
+                        
+                    } catch (error) {
+                        console.error("添加书签失败:", error);
+                        alert("添加书签失败: " + error);
+                    }
+                });
+                
+                document.getElementById("prevBookmarkBtn").addEventListener("click", async function() {
+                    alert("上一个书签功能待实现");
+                });
+                
+                document.getElementById("nextBookmarkBtn").addEventListener("click", async function() {
+                    alert("下一个书签功能待实现");
+                });
+                
+                document.getElementById("addNoteBtn").addEventListener("click", async function() {
+                    const title = document.getElementById("noteTitle").value.trim();
+                    const content = document.getElementById("noteContent").value.trim();
+                    
+                    if (!title) {
+                        alert("请输入笔记标题");
+                        return;
+                    }
+                    
+                    if (!content) {
+                        alert("请输入笔记内容");
+                        return;
+                    }
+                    
+                    try {
+                        await addNote({
+                            title,
+                            content,
+                            createdAt: new Date().toISOString()
+                        });
+                        
+                        document.getElementById("noteTitle").value = "";
+                        document.getElementById("noteContent").value = "";
+                        alert("笔记添加成功！");
+                        await displayNotes();
+                        
+                    } catch (error) {
+                        console.error("添加笔记失败:", error);
+                        alert("添加笔记失败: " + error);
+                    }
+                });
+                
+                document.querySelectorAll(".tab-button").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        const tabName = this.getAttribute("data-tab");
+                        switchTab(tabName);
+                    });
+                });
+                
+            } catch (error) {
+                console.error("初始化失败:", error);
+                alert("初始化失败: " + error);
+            }
+        });
+    </script>
+</body>
+</html>
